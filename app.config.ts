@@ -1,19 +1,19 @@
-import { ExpoConfig, ConfigContext } from "@expo/config"
+import { ExpoConfig, ConfigContext } from "@expo/config";
 
 /**
  * Use ts-node here so we can use TypeScript for our Config Plugins
  * and not have to compile them to JavaScript
  */
-require("ts-node/register")
+require("ts-node/register");
 
 /**
  * @param config ExpoConfig coming from the static config app.json if it exists
- * 
+ *
  * You can read more about Expo's Configuration Resolution Rules here:
  * https://docs.expo.dev/workflow/configuration/#configuration-resolution-rules
  */
 module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
-  const existingPlugins = config.plugins ?? []
+  const existingPlugins = config.plugins ?? [];
 
   return {
     ...config,
@@ -21,5 +21,12 @@ module.exports = ({ config }: ConfigContext): Partial<ExpoConfig> => {
       ...existingPlugins,
       require("./plugins/withSplashScreen").withSplashScreen,
     ],
-  }
-}
+    extra: {
+      ...config.extra,
+      eas: {
+        projectId: "cae1f385-5546-48e1-8a3f-4ff14caafa43",
+      },
+    },
+  };
+};
+

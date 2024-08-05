@@ -1,10 +1,10 @@
 {
-  "name": "Preto",
-  "displayName": "Preto",
+  "name": "Pretoapp",
+  "displayName": "Pretoapp",
   "expo": {
-    "name": "Preto",
-    "slug": "Preto",
-    "scheme": "preto",
+    "name": "Pretoapp",
+    "slug": "Pretoapp",
+    "scheme": "pretoapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-all.png",
@@ -22,7 +22,7 @@
     ],
     "android": {
       "icon": "./assets/images/app-icon-android-legacy.png",
-      "package": "com.preto",
+      "package": "com.pretoapp",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/app-icon-android-adaptive-foreground.png",
         "backgroundImage": "./assets/images/app-icon-android-adaptive-background.png"
@@ -36,7 +36,7 @@
     "ios": {
       "icon": "./assets/images/app-icon-ios.png",
       "supportsTablet": true,
-      "bundleIdentifier": "com.preto",
+      "bundleIdentifier": "com.pretoapp",
       "splash": {
         "image": "./assets/images/splash-logo-ios-mobile.png",
         "tabletImage": "./assets/images/splash-logo-ios-tablet.png",

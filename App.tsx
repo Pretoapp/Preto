@@ -1,12 +1,15 @@
-import "@expo/metro-runtime"
-import React from "react"
-import * as SplashScreen from "expo-splash-screen"
-import App from "./app/app"
+// App.tsx
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import AppNavigator from "./app/navigators/AppNavigator";
 
-SplashScreen.preventAutoHideAsync()
+const App = () => {
+  return (
+    <NavigationContainer>
+      <AppNavigator />
+    </NavigationContainer>
+  );
+};
 
-function IgniteApp() {
-  return <App hideSplashScreen={SplashScreen.hideAsync} />
-}
+export default App;
 
-export default IgniteApp

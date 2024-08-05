@@ -1,144 +1,188 @@
-import { observer } from "mobx-react-lite"
-import React, { ComponentType, FC, useEffect, useMemo, useRef, useState } from "react"
-import { TextInput, TextStyle, ViewStyle } from "react-native"
-import { Button, Icon, Screen, Text, TextField, TextFieldAccessoryProps } from "../components"
-import { useStores } from "../models"
-import { AppStackScreenProps } from "../navigators"
-import { colors, spacing } from "../theme"
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useNavigation } from '@react-navigation/native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
-interface LoginScreenProps extends AppStackScreenProps<"Login"> {}
+const LoginScreen = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
 
-export const LoginScreen: FC<LoginScreenProps> = observer(function LoginScreen(_props) {
-  const authPasswordInput = useRef<TextInput>(null)
-
-  const [authPassword, setAuthPassword] = useState("")
-  const [isAuthPasswordHidden, setIsAuthPasswordHidden] = useState(true)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [attemptsCount, setAttemptsCount] = useState(0)
-  const {
-    authenticationStore: { authEmail, setAuthEmail, setAuthToken, validationError },
-  } = useStores()
-
-  useEffect(() => {
-    // Here is where you could fetch credentials from keychain or storage
-    // and pre-fill the form fields.
-    setAuthEmail("ignite@infinite.red")
-    setAuthPassword("ign1teIsAwes0m3")
-
-    // Return a "cleanup" function that React will run when the component unmounts
-    return () => {
-      setAuthPassword("")
-      setAuthEmail("")
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Validation Error", "Email and password are required.");
+      return;
     }
-  }, [])
 
-  const error = isSubmitted ? validationError : ""
+    setIsLoading(true);
 
-  function login() {
-    setIsSubmitted(true)
-    setAttemptsCount(attemptsCount + 1)
-
-    if (validationError) return
-
-    // Make a request to your server to get an authentication token.
-    // If successful, reset the fields and set the token.
-    setIsSubmitted(false)
-    setAuthPassword("")
-    setAuthEmail("")
-
-    // We'll mock this with a fake token.
-    setAuthToken(String(Date.now()))
-  }
-
-  const PasswordRightAccessory: ComponentType<TextFieldAccessoryProps> = useMemo(
-    () =>
-      function PasswordRightAccessory(props: TextFieldAccessoryProps) {
-        return (
-          <Icon
-            icon={isAuthPasswordHidden ? "view" : "hidden"}
-            color={colors.palette.neutral800}
-            containerStyle={props.style}
-            size={20}
-            onPress={() => setIsAuthPasswordHidden(!isAuthPasswordHidden)}
-          />
-        )
-      },
-    [isAuthPasswordHidden],
-  )
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate("MainTabs"); // Make sure this matches your stack navigator name
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("Login Error", error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={$screenContentContainer}
-      safeAreaEdges={["top", "bottom"]}
-    >
-      <Text testID="login-heading" tx="loginScreen.logIn" preset="heading" style={$logIn} />
-      <Text tx="loginScreen.enterDetails" preset="subheading" style={$enterDetails} />
-      {attemptsCount > 2 && <Text tx="loginScreen.hint" size="sm" weight="light" style={$hint} />}
-
-      <TextField
-        value={authEmail}
-        onChangeText={setAuthEmail}
-        containerStyle={$textField}
-        autoCapitalize="none"
-        autoComplete="email"
-        autoCorrect={false}
-        keyboardType="email-address"
-        labelTx="loginScreen.emailFieldLabel"
-        placeholderTx="loginScreen.emailFieldPlaceholder"
-        helper={error}
-        status={error ? "error" : undefined}
-        onSubmitEditing={() => authPasswordInput.current?.focus()}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Image source={require("../../assets/images/logo-copy.png")} style={styles.logo} />
+        <Text style={styles.title}>Welcome to Preto</Text>
+      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        placeholderTextColor="#FFD700"
+        accessibilityLabel="Email input field"
       />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={!showPassword}
+          placeholderTextColor="#FFD700"   
+          accessibilityLabel="Password input field"
+        />
+        <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+          <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="#FFD700" />
+        </TouchableOpacity>
+      </View>
+      {isLoading && (
+        <ActivityIndicator size="small" color="#FFD700" style={styles.activityIndicator} />
+      )}
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <View style={styles.signupSection}>
+        <Text style={styles.link}>Don&#39;t have an account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+          <Text style={styles.signupLink}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity
+        style={styles.forgotPasswordContainer}
+        onPress={() => Alert.alert("Forgot Password", "Password reset instructions sent.")}
+      >
+        <Icon name="lock-closed-outline" size={20} color="#FFD700" />
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity> 
+    </View>
+  );
+};
 
-      <TextField
-        ref={authPasswordInput}
-        value={authPassword}
-        onChangeText={setAuthPassword}
-        containerStyle={$textField}
-        autoCapitalize="none"
-        autoComplete="password"
-        autoCorrect={false}
-        secureTextEntry={isAuthPasswordHidden}
-        labelTx="loginScreen.passwordFieldLabel"
-        placeholderTx="loginScreen.passwordFieldPlaceholder"
-        onSubmitEditing={login}
-        RightAccessory={PasswordRightAccessory}
-      />
+const styles = StyleSheet.create({
+  activityIndicator: {
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#000", 
+    fontSize: 18,
+    fontWeight: "bold", 
+  },
+  container: {
+    alignItems: "center",
+    backgroundColor: "#000",
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  eyeIcon: {
+    position: "absolute", 
+    right: 10,
+  },
+  forgotPasswordContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  forgotPasswordText: {
+    color: "#FFD700",
+    marginLeft: 5,
+    textDecorationLine: "none",
+  },
+  header: {
+    alignItems: "center",
+    flexDirection: "column",
+    marginBottom: 30,
+  },
+  input: {
+    backgroundColor: "#000",
+    borderColor: "#FFD700",
+    borderRadius: 8,
+    borderWidth: 1,
+    color: "#FFF",
+    fontSize: 16,
+    marginBottom: 15,
+    padding: 10,
+    textAlign: "left",
+    width: "100%",
+  },
+  link: {
+    color: "#FFD700",
+    marginBottom: 5,
+    textDecorationLine: "none",
+  },
+  loginButton: {
+    alignItems: "center",   
+    backgroundColor: "#FFD700",
+    borderRadius: 8,
+    marginTop: 20,
+    padding: 15,
+    width: "100%",
+  },
+  logo: {
+    height: 100,
+    marginBottom: 20,
+    resizeMode: "contain",
+    width: 100,  
+  },
+  passwordContainer: {   
+    alignItems: "center",
+    flexDirection: "row",
+    width: "100%",
+  },
+  signupLink: {
+    color: "#FFD700",
+    fontWeight: "bold",
+    textDecorationLine: "none",
+  },
+  signupSection: {
+    alignItems: "center",
+    marginTop: 30,
+  },
+  title: {
+    color: "#FFD700",
+    fontFamily: "SpaceGrotesk-Bold",
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 30,
+  },
+});
 
-      <Button
-        testID="login-button"
-        tx="loginScreen.tapToLogIn"
-        style={$tapButton}
-        preset="reversed"
-        onPress={login}
-      />
-    </Screen>
-  )
-})
+export default LoginScreen;
 
-const $screenContentContainer: ViewStyle = {
-  paddingVertical: spacing.xxl,
-  paddingHorizontal: spacing.lg,
-}
 
-const $logIn: TextStyle = {
-  marginBottom: spacing.sm,
-}
 
-const $enterDetails: TextStyle = {
-  marginBottom: spacing.lg,
-}
 
-const $hint: TextStyle = {
-  color: colors.tint,
-  marginBottom: spacing.md,
-}
 
-const $textField: ViewStyle = {
-  marginBottom: spacing.lg,
-}
-
-const $tapButton: ViewStyle = {
-  marginTop: spacing.xs,
-}
