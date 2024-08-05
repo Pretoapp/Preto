@@ -22,6 +22,17 @@ DerivedData
 *.xcuserstate
 ios/.xcode.env.local
 
+# Ignore everything in the ios directory except for important files
+# Ignore ios/ directory but not its subdirectories
+ios/*
+# Don't ignore .gitignore in ios directory
+!ios/.gitignore
+# Don't ignore xcworkspace, xcodeproj, and other critical files
+!ios/*.xcworkspace
+!ios/*.xcodeproj
+!ios/Podfile
+!ios/Podfile.lock
+
 # Android/IntelliJ
 #
 build/
@@ -46,7 +57,7 @@ buck-out/
 
 # fastlane
 #
-# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+# It is recommended to not store the screenshots in the git repo. Instead, use $
 # screenshots whenever they are needed.
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/
@@ -70,7 +81,6 @@ buck-out/
 .expo/*
 bin/Exponent.app
 /android
-# ios/
 
 ## Secrets
 npm-debug.*
@@ -86,3 +96,4 @@ web-build/
 !env.js
 
 /coverage
+
